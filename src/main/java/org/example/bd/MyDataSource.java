@@ -50,10 +50,8 @@ public class MyDataSource {
         OracleDataSource oracleDS = null;
 
         try(FileInputStream fis = new FileInputStream("db.properties");) {
-
             // Cargamos las propiedades
             props.load(fis);
-
             // Generamos el DataSource con los datos URL, user y passwd necesarios
             oracleDS = new OracleDataSource();
             oracleDS.setURL(props.getProperty("ORACLE_DB_URL"));

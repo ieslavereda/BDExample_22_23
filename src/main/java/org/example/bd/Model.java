@@ -1,13 +1,19 @@
 package org.example.bd;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Model {
+
+    public void conectar(){
+        try(Connection con = MyDataSource.getOracleDataSource().getConnection()){
+            System.out.println("OK");
+        } catch (SQLException e) {
+            System.out.println("Error");
+            throw new RuntimeException(e);
+        }
+    }
 
     public List<Empleado> getEmpleados() {
         List<Empleado> empleados = new ArrayList<>();
@@ -67,13 +73,74 @@ public class Model {
         return empleado;
     }
 
-    public int updateEmpleado(Empleado e) {
-        String sql = "UPDATE EMPLEADO SET DNI='" + e.getDNI() + "',nombre='" + e.getNombre() + "',apellidos='" + e.getApellidos() + "' WHERE idEmpleado=" + e.getIdEmpleado();
-        return executeStatement(sql);
+    public Empleado crearEmpleado(Empleado e){
+        String sql = "INSERT INTO EMPLEADO (DNI,nombre,apellidos) VALUES (?,?,?)";
+        try(Connection c = MyDataSource.getMySQLDataSource().getConnection();
+            PreparedStatement pstmt = c.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)){
+
+            int pos = 0;
+
+            pstmt.setString(++pos,e.getDNI());
+            pstmt.setString(++pos,e.getNombre());
+            pstmt.setString(++pos,e.getApellidos());
+
+            if(pstmt.executeUpdate()==0)
+                throw new SQLException("No se ha podido crear el empleado");
+
+            try(ResultSet rs = pstmt.getGeneratedKeys()){
+
+                if(rs.next())
+                    e.setIdEmpleado(rs.getInt(1));
+                else
+                    throw new SQLException("No se ha podido obtener el id asignado");
+
+
+//                List<Empleado> listado = new ArrayList<>();
+//                Empleado empleado = new Empleado(1,"","","");
+//                listado.get(listado.indexOf(empleado));
+//                Empleado e2 = listado.stream()
+//                        .filter(e3->e3.getIdEmpleado()==1)
+//                        .findFirst()
+//                        .get();
+                return e;
+            }
+
+
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    public boolean guardarEmpleado(Empleado e){
+        String sql = "INSERT INTO EMPLEADO SET " +
+                "DNI='"+e.getDNI()+"', "+
+                "nombre='"+e.getNombre()+"',  "+
+                "apellidos='"+e.getApellidos()+"'";
+
+        return executeStatement(sql)==1;
     }
 
-    public int deleteEmpleado(String dni) {
-        String sql = "DELETE FROM EMPLEADO WHERE DNI LIKE '" + dni + "'";
+    public int deleteEmpleado(String dni){
+
+        String sql = "DELETE FROM EMPLEADO WHERE DNI LIKE ?";
+
+        try( Connection c = MyDataSource.getMySQLDataSource().getConnection();
+             PreparedStatement pstmt = c.prepareStatement(sql)
+        ) {
+
+            int pos = 0;
+
+            pstmt.setString(++pos,dni);
+
+            return pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public int updateEmpleado(Empleado e) {
+        String sql = "UPDATE EMPLEADO SET DNI='" + e.getDNI() + "',nombre='" + e.getNombre() + "',apellidos='" + e.getApellidos() + "' WHERE idEmpleado=" + e.getIdEmpleado();
         return executeStatement(sql);
     }
 

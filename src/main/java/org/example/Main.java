@@ -14,13 +14,7 @@ public class Main {
 
         Model m = new Model();
 
-//        System.out.println(m.getEmpleados());
-//        System.out.println(m.getEmpleado(3));
-
-        Empleado empleado3 = m.getEmpleado(3);
-        empleado3.setNombre("Nombre actualizado");
-
-        System.out.println(m.deleteEmpleado("A' OR '1' LIKE '1"));
+        m.conectar();
 
     }
 

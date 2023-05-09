@@ -13,6 +13,12 @@ public class Empleado {
         this.apellidos = apellidos;
     }
 
+    public Empleado(String DNI, String nombre, String apellidos) {
+        this.DNI = DNI;
+        this.nombre = nombre;
+        this.apellidos = apellidos;
+    }
+
     public int getIdEmpleado() {
         return idEmpleado;
     }
